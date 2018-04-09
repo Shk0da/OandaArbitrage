@@ -2,6 +2,7 @@ package com.oanda.arbitrage.service;
 
 import com.google.common.collect.Lists;
 import com.oanda.v20.Context;
+import com.oanda.v20.RequestException;
 import com.oanda.v20.account.AccountID;
 import com.oanda.v20.instrument.Candlestick;
 import com.oanda.v20.instrument.InstrumentCandlesRequest;
@@ -28,6 +29,8 @@ public class TradeService {
     public List<Instrument> getInstruments() {
         try {
             return context.account.instruments(accountID).getInstruments();
+        } catch (RequestException ex) {
+            log.error("GetInstruments: {}", ex.getErrorMessage());
         } catch (Exception ex) {
             log.error("GetInstruments: {}", ex.getMessage());
         }
@@ -41,6 +44,8 @@ public class TradeService {
             request.setPrice("AB");
             request.setCount(size);
             return context.instrument.candles(request).getCandles();
+        } catch (RequestException ex) {
+            log.error("GetLastCandles: {}", ex.getErrorMessage());
         } catch (Exception ex) {
             log.error("GetLastCandles: {}", ex.getMessage());
         }
@@ -53,8 +58,10 @@ public class TradeService {
             return context.pricing.get(accountID, instruments.stream()
                     .map(Instrument::getName)
                     .collect(Collectors.toList())).getPrices();
+        } catch (RequestException ex) {
+            log.error("GetCurrentPrices: {}", ex.getErrorMessage());
         } catch (Exception ex) {
-            log.error("GetCurrentPricing: {}", ex.getMessage());
+            log.error("GetCurrentPrices: {}", ex.getMessage());
         }
 
         return Lists.newArrayList();
@@ -79,6 +86,8 @@ public class TradeService {
             Transaction transaction = context.order.create(orderCreateRequest).getOrderCreateTransaction();
             log.info("Transaction: {} {} {} {} {}", transaction.getId(), instrument, orderRequest.getUnits(),
                     transaction.getType(), transaction.getTime());
+        } catch (RequestException ex) {
+            log.error("CreateOrder: {}", ex.getErrorMessage());
         } catch (Exception ex) {
             log.error("CreateOrder: {}", ex.getMessage());
         }
@@ -87,6 +96,8 @@ public class TradeService {
     public double getBalance() {
         try {
             return context.account.summary(accountID).getAccount().getBalance().doubleValue();
+        } catch (RequestException ex) {
+            log.error("GetBalance: {}", ex.getErrorMessage());
         } catch (Exception ex) {
             log.error("GetBalance: {}", ex.getMessage());
         }
