@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Repository
 public class GraphRepository {
 
-    // todo in next versions
     public static final int RING_SIZE = 5;
     public static final int TRIANGULAR_SIZE = 3;
 
@@ -24,31 +23,34 @@ public class GraphRepository {
     @Getter
     private final List<Set<String>> triangularList = Lists.newArrayList();
 
-    public GraphRepository(InstrumentRepository instrumentRepository) {
+    public GraphRepository(InstrumentRepository instrumentRepository, String balanceCurrency) {
         Set<String> symbols = instrumentRepository.getSymbols()
                 .stream()
                 .filter(symbol -> symbol.contains("/"))
                 .collect(Collectors.toSet());
 
         // triangular
-        symbols.forEach(symbol -> {
-            String[] currencies = symbol.split("/");
-            Set<String> vertexsMiddle = symbols.stream()
-                    .filter(s -> s.contains(currencies[0] + "/") && !s.contains("/" + currencies[1]))
-                    .collect(Collectors.toSet());
-            vertexsMiddle.forEach(vertexMiddle -> {
-                String[] currenciesVertexMiddle = vertexMiddle.split("/");
-                symbols.stream()
-                        .filter(s -> s.contains(currenciesVertexMiddle[1] + "/" + currencies[1]))
-                        .collect(Collectors.toSet())
-                        .forEach(vertexEnd -> {
-                            Set<String> triangular = Sets.newLinkedHashSet();
-                            triangular.add(symbol);
-                            triangular.add(vertexMiddle);
-                            triangular.add(vertexEnd);
-                            triangularList.add(triangular);
-                        });
-            });
-        });
+        symbols.stream()
+                .filter(symbol -> symbol.contains("/" + balanceCurrency))
+                .forEach(symbol -> {
+                    // first
+                    String[] currencies = symbol.split("/");
+                    symbols.stream()
+                            .filter(s -> s.contains(currencies[0] + "/") && !s.contains("/" + currencies[1]))
+                            .forEach(vertexMiddle -> {
+                                // second
+                                String[] currenciesVertexMiddle = vertexMiddle.split("/");
+                                symbols.stream()
+                                        .filter(s -> s.contains(currenciesVertexMiddle[1] + "/" + currencies[1]))
+                                        .forEach(vertexEnd -> {
+                                            // third
+                                            Set<String> triangular = Sets.newLinkedHashSet();
+                                            triangular.add(symbol);
+                                            triangular.add(vertexMiddle);
+                                            triangular.add(vertexEnd);
+                                            triangularList.add(triangular);
+                                        });
+                            });
+                });
     }
 }
