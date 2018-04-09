@@ -44,7 +44,7 @@ public class CalculateActor extends UntypedAbstractActor {
                     .collect(Collectors.toSet())
                     .toArray(new String[]{});
 
-            // bue
+            // buy
             Candle vertex1 = candleRepository.getCandle(symbols[0]);
             // sell
             Candle vertex2 = candleRepository.getCandle(symbols[1]);
