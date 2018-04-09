@@ -48,6 +48,6 @@ public class Scheduler {
 
     @Scheduled(fixedDelayString = "${oanda.scheduler.balance.check}")
     public void fireShowBalance() {
-        log.info("Balance: {} USD", tradeService.getBalance());
+        log.warn("Balance: {} USD", tradeService.getBalance());
     }
 }
