@@ -71,7 +71,7 @@ public class CalculateActor extends UntypedAbstractActor {
                     log.info("{} - {} * {} = {}, diff = {}", symbols[0], symbols[1], symbols[2], result, diff);
                     tradeService.createMarketOrder(vertex1.getSymbol(), vertex1.getAsk(), 1);
                     tradeService.createMarketOrder(vertex2.getSymbol(), vertex2.getBid(), -1);
-                    tradeService.createMarketOrder(vertex3.getSymbol(), vertex2.getBid(), -1);
+                    tradeService.createMarketOrder(vertex3.getSymbol(), vertex3.getBid(), -1);
                     log.info("******************* END ARBITRAGE *******************");
                 }
             }
