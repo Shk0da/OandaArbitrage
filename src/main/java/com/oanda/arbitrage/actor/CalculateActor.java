@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 @Component("calculateActor")
 public class CalculateActor extends UntypedAbstractActor {
 
+    private static final Object lock = new Object();
+
     private final Set<String> graph;
 
     @Autowired
@@ -63,11 +65,15 @@ public class CalculateActor extends UntypedAbstractActor {
             double result = vertex1.getAsk() - vertex2.getBid() * vertex3.getBid();
             double spread = vertex1.getAsk() - vertex1.getBid();
             double diff = result - spread;
-            if (diff > 1) {
-                log.info("{} - {} * {} = {}, diff = {}", symbols[0], symbols[1], symbols[2], result, diff);
-                tradeService.createMarketOrder(vertex1.getSymbol(), vertex1.getAsk(), 1);
-                tradeService.createMarketOrder(vertex2.getSymbol(), vertex2.getBid(), -1);
-                tradeService.createMarketOrder(vertex3.getSymbol(), vertex2.getBid(), -1);
+            if (diff > 0) {
+                synchronized (lock) {
+                    log.info("****************** START ARBITRAGE ******************");
+                    log.info("{} - {} * {} = {}, diff = {}", symbols[0], symbols[1], symbols[2], result, diff);
+                    tradeService.createMarketOrder(vertex1.getSymbol(), vertex1.getAsk(), 1);
+                    tradeService.createMarketOrder(vertex2.getSymbol(), vertex2.getBid(), -1);
+                    tradeService.createMarketOrder(vertex3.getSymbol(), vertex2.getBid(), -1);
+                    log.info("******************* END ARBITRAGE *******************");
+                }
             }
 
             lastUpdate = currentUpdate;
